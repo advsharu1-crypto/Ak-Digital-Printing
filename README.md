@@ -85,3 +85,9 @@ All images are embedded in the HTML (see `docs/IMAGE-VERIFICATION.md`): the orig
 ## Rebuilding the HTML
 
 Edit `site/index.src.html`, `site/extra.css`, `site/admin.css`, `site/public.js` or `site/admin.js`, then run `python3 site/build.py`. The fonts (DM Sans, Manrope — SIL OFL), Noto Sans Tamil (SIL OFL), the QR library (qrcode-generator, MIT) and all images are inlined, so the file makes no external requests.
+
+## Vercel (front end only)
+
+`vercel.json` + `scripts/build-vercel.js` publish `public/AK-Digital-Printing-Final.html` as a static site (with a hash-based CSP and security headers). **Vercel has no persistent disk, so the backend (orders, admin, SMS, uploads) does not run there.** On Vercel the quotation form opens WhatsApp and says no Order ID was issued; admin sign-in and order tracking need the backend hosted elsewhere (Render, Railway or a VPS, see `DEPLOY.md`).
+
+`branding/` holds the logo, favicon and social-image files. `dist/` (the optimised build) and `site/` (sources) are not in this repository yet.

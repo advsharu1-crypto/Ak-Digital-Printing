@@ -12,3 +12,4 @@ uploads/
 .vercel/
 .DS_Store
 *.log
+.vercel-site/
