@@ -12,11 +12,12 @@ const host = (process.env.SITE_URL || 'https://www.akdigitalprinters.com').repla
 let html = fs.readFileSync(path.join(root, 'public', 'AK-Digital-Printing-Final.html'), 'utf8');
 html = host ? html.split('%%SITE_URL%%').join(host) : html.replace(/<(?:link|meta)[^>]*%%SITE_URL%%[^>]*>\n?/g, '').split('%%SITE_URL%%').join('');
 const title = (html.match(/<title>([\s\S]*?)<\/title>/) || [, 'AK Digital Printing'])[1];
-const social = [`<link rel="canonical" href="${host}/">`, `<meta property="og:url" content="${host}/">`,
+const social = ['<meta name="google-site-verification" content="QPN6BRJWkKJXN0_p01m_lWYSxLivh8r0JJLJMKnWJWA">', `<link rel="canonical" href="${host}/">`, `<meta property="og:url" content="${host}/">`,
   `<meta property="og:image" content="${host}/og-image.jpg">`, `<meta property="og:image:secure_url" content="${host}/og-image.jpg">`,
   '<meta property="og:image:type" content="image/jpeg">', '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">',
   '<meta property="og:image:alt" content="AK Digital Printing, Suranam: flex banners, photo printing, name boards, litho printing and xerox">',
   `<meta name="twitter:image" content="${host}/og-image.jpg">`].join('\n');
+html = html.replace(/<meta name="google-site-verification"[^>]*>\n?/g, '');
 html = html.replace(/<link rel="canonical"[^>]*>\n?|<meta property="og:(?:url|image[^"]*)"[^>]*>\n?|<meta name="twitter:image"[^>]*>\n?/g, '');
 // Insert near the TOP of <head>: crawlers such as WhatsApp read only the first few hundred KB and this page has large inline data after the meta tags.
 html = html.replace('<title>', social + '\n<title>');
@@ -29,6 +30,8 @@ fs.writeFileSync(path.join(out, 'index.html'), html);
 const copy = (from, to) => { const s = path.join(root, 'branding', from); if (fs.existsSync(s)) { fs.mkdirSync(path.dirname(path.join(out, to)), { recursive: true }); fs.copyFileSync(s, path.join(out, to)); } };
 copy('favicon/favicon.ico', 'favicon.ico'); copy('favicon/apple-touch-icon.png', 'apple-touch-icon.png');
 copy('social/og-image-1200x630.jpg', 'og-image.jpg');
+// Search Console verification files (verification/*.html are served from the site root)
+const vdir = path.join(root, 'verification'); if (fs.existsSync(vdir)) for (const f of fs.readdirSync(vdir)) fs.copyFileSync(path.join(vdir, f), path.join(out, f));
 fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\n${host ? `Sitemap: ${host}/sitemap.xml\n` : ''}`);
 if (host) fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${host}/</loc></url></urlset>\n`);
 console.log(`[build-vercel] ${(html.length / 1024).toFixed(0)} KB index.html, ${hashes.length} inline script hash(es), site url: ${host || '(none)'}`);
