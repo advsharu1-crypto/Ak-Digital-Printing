@@ -7,9 +7,19 @@
 const fs = require('node:fs'); const path = require('node:path'); const crypto = require('node:crypto');
 const root = path.join(__dirname, '..'); const out = path.join(root, '.vercel-site');
 fs.rmSync(out, { recursive: true, force: true }); fs.mkdirSync(out, { recursive: true });
-const host = (process.env.SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? 'https://' + process.env.VERCEL_PROJECT_PRODUCTION_URL : '')).replace(/\/+$/, '');
+// Canonical public address (override with SITE_URL). Social previews (WhatsApp, Facebook, X) need ABSOLUTE image URLs.
+const host = (process.env.SITE_URL || 'https://www.akdigitalprinters.com').replace(/\/+$/, '');
 let html = fs.readFileSync(path.join(root, 'public', 'AK-Digital-Printing-Final.html'), 'utf8');
 html = host ? html.split('%%SITE_URL%%').join(host) : html.replace(/<(?:link|meta)[^>]*%%SITE_URL%%[^>]*>\n?/g, '').split('%%SITE_URL%%').join('');
+const title = (html.match(/<title>([\s\S]*?)<\/title>/) || [, 'AK Digital Printing'])[1];
+const social = [`<link rel="canonical" href="${host}/">`, `<meta property="og:url" content="${host}/">`,
+  `<meta property="og:image" content="${host}/og-image.jpg">`, `<meta property="og:image:secure_url" content="${host}/og-image.jpg">`,
+  '<meta property="og:image:type" content="image/jpeg">', '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">',
+  '<meta property="og:image:alt" content="AK Digital Printing, Suranam: flex banners, photo printing, name boards, litho printing and xerox">',
+  `<meta name="twitter:image" content="${host}/og-image.jpg">`].join('\n');
+html = html.replace(/<link rel="canonical"[^>]*>\n?|<meta property="og:(?:url|image[^"]*)"[^>]*>\n?|<meta name="twitter:image"[^>]*>\n?/g, '');
+// Insert near the TOP of <head>: crawlers such as WhatsApp read only the first few hundred KB and this page has large inline data after the meta tags.
+html = html.replace('<title>', social + '\n<title>');
 const hashes = [...html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*type=["']application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g)]
   .map((m) => `'sha256-${crypto.createHash('sha256').update(m[1], 'utf8').digest('base64')}'`);
 const csp = ["default-src 'self'", `script-src 'self' ${hashes.join(' ')}`, "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob: https:",
