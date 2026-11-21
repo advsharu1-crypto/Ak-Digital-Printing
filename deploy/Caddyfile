@@ -1,0 +1,7 @@
+# Automatic HTTPS. DOMAIN comes from deploy/.env (e.g. akdigitalprinting.in).
+{$DOMAIN}, www.{$DOMAIN} {
+	@www host www.{$DOMAIN}
+	redir @www https://{$DOMAIN}{uri} permanent
+	encode zstd gzip
+	reverse_proxy app:8787
+}

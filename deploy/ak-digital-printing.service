@@ -1,0 +1,22 @@
+# systemd unit for a VPS without Docker (put the project in /opt/ak-digital-printing, env in /etc/ak-digital-printing.env)
+[Unit]
+Description=AK Digital Printing website + API
+After=network.target
+
+[Service]
+Type=simple
+User=ak
+WorkingDirectory=/opt/ak-digital-printing/backend
+EnvironmentFile=/etc/ak-digital-printing.env
+Environment=NODE_ENV=production PUBLIC_DIR=/opt/ak-digital-printing/dist DB_FILE=/var/lib/ak/ak.db UPLOADS_DIR=/var/lib/ak/uploads BACKUP_DIR=/var/lib/ak/backups
+ExecStart=/usr/bin/node src/server.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/ak
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

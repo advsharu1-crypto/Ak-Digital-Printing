@@ -1,0 +1,20 @@
+{
+  "name": "ak-digital-printing-backend",
+  "version": "1.0.0",
+  "description": "AK Digital Printing backend: orders, consent, reminders, SMS campaigns, reviews, promotions",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "compression": "^1.8.2",
+    "express": "^4.22.3"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

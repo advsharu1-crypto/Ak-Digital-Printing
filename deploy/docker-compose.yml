@@ -1,0 +1,26 @@
+# VPS deployment: app + Caddy (automatic HTTPS via Let's Encrypt).
+# 1. Point your domain's DNS A/AAAA records to this server.  2. cp deploy/.env.example deploy/.env and fill it in.
+# 3. docker compose -f deploy/docker-compose.yml up -d --build
+services:
+  app:
+    build: ..
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ak-data:/data          # SQLite database, uploads and backups (persist across deploys)
+    expose: ["8787"]
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+volumes:
+  ak-data:
+  caddy-data:
+  caddy-config:
