@@ -25,10 +25,16 @@ async function sendWeb3(d){
     note:'Sent from the website without a database: no Order ID has been issued. Consent choices above are as ticked by the customer.'})});
   const j=await r.json().catch(()=>({}));if(!r.ok||!j.success)throw new Error(j.message||'The enquiry service did not accept the request');
 }
+async function saveEnquiry(d){
+  const r=await fetch('/api/enquiry',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:d.name,phone:d.phone,email:d.email||'',service:d.service,size:d.size||'',quantity:d.quantity||'',needed_by:d.needed_by||'',details:d.details||'',consent_operational:!!d.consent_operational,consent_promotional:!!d.consent_promotional,consent_version:d.consent_version||'v1',website:''})});
+  if(!r.ok)throw new Error('Enquiry could not be saved');
+}
 function updateFormMode(ok){`);
+// Staff admin lives at /admin (Vercel serverless + Postgres); the homepage button just goes there.
+sub("$$('[data-open-admin]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();AK.openAdmin()}));", "$$('[data-open-admin]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();location.href='/admin'}));if(location.hash==='#admin')location.replace('/admin');");
 sub("'Online registration is unavailable here, so your enquiry will open in WhatsApp for you to review and send. You can withdraw promotional consent at any time — '",
     "'Your enquiry is sent to our team by email and we will contact you with your quotation. No Order ID is issued online yet. You can withdraw promotional consent at any time — '");
-sub("if(!ok){showResult('offline',d);return}", "if(!ok){try{await sendWeb3(d);showResult('emailed',d);form.reset()}catch(err){showResult('error',d,null,'We could not send your enquiry just now.')}return}");
+sub("if(!ok){showResult('offline',d);return}", "if(!ok){const rs=await Promise.allSettled([sendWeb3(d),saveEnquiry(d)]);if(rs.some(x=>x.status==='fulfilled')){showResult('emailed',d);form.reset()}else{showResult('error',d,null,'We could not send your enquiry just now.')}return}");
 sub("else if(kind==='offline')h=", "else if(kind==='emailed')h=`<div class=\"result-icon ok\">✓</div><h3 id=\"resultTitle\">Enquiry sent</h3><p class=\"muted-p\">Thank you, ${esc(d.name)}. Our team will contact you on +91 ${esc(d.phone)} with your quotation. No Order ID has been issued online yet; we will share one when your order is registered. ${d.consent_promotional?'You opted in to offers and reminders: you can stop them any time.':'You will not receive promotional messages.'}</p><a class=\"btn btn-gold\" style=\"width:100%\" target=\"_blank\" rel=\"noopener\" href=\"${wa}\">Also send reference design on WhatsApp ↗</a>`;\n  else if(kind==='offline')h=");
 
 const title = (html.match(/<title>([\s\S]*?)<\/title>/) || [, 'AK Digital Printing'])[1];
@@ -50,8 +56,12 @@ fs.writeFileSync(path.join(out, 'index.html'), html);
 const copy = (from, to) => { const s = path.join(root, 'branding', from); if (fs.existsSync(s)) { fs.mkdirSync(path.dirname(path.join(out, to)), { recursive: true }); fs.copyFileSync(s, path.join(out, to)); } };
 copy('favicon/favicon.ico', 'favicon.ico'); copy('favicon/apple-touch-icon.png', 'apple-touch-icon.png');
 copy('social/og-image-1200x630.jpg', 'og-image.jpg');
+// Staff admin panel (static UI; the API lives in /api as serverless functions)
+const adminSrc = path.join(root, 'admin'); const adminOut = path.join(out, 'admin'); fs.mkdirSync(adminOut, { recursive: true });
+for (const f of fs.readdirSync(adminSrc)) fs.copyFileSync(path.join(adminSrc, f), path.join(adminOut, f));
+copy('logo/ak-logo-header.webp', 'admin/logo.webp');
 // Search Console verification files (verification/*.html are served from the site root)
 const vdir = path.join(root, 'verification'); if (fs.existsSync(vdir)) for (const f of fs.readdirSync(vdir)) fs.copyFileSync(path.join(vdir, f), path.join(out, f));
-fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\n${host ? `Sitemap: ${host}/sitemap.xml\n` : ''}`);
+fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n${host ? `Sitemap: ${host}/sitemap.xml\n` : ''}`);
 if (host) fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${host}/</loc></url></urlset>\n`);
 console.log(`[build-vercel] ${(html.length / 1024).toFixed(0)} KB index.html, ${hashes.length} inline script hash(es), site url: ${host || '(none)'}`);

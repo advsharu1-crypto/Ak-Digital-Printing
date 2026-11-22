@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Staff Login · AK Digital Printing</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+<main id="login" class="center" hidden>
+  <section class="card login-card" aria-labelledby="lt">
+    <img class="logo" src="/admin/logo.webp" alt="AK Digital Printing" width="160" height="48">
+    <h1 id="lt">Staff sign-in</h1>
+    <p class="muted">Enquiry dashboard — for AK Digital Printing staff only.</p>
+    <div id="loginError" class="alert" role="alert" hidden></div>
+    <a id="googleBtn" class="btn google" href="/api/auth/google" hidden>
+      <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.4 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.1 5.5c4.3-4 6.8-9.9 6.8-16.9z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.1-5.5c-2 1.4-4.6 2.3-8.8 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+      <span>Continue with Google</span>
+    </a>
+    <div id="orSep" class="sep" hidden><span>or</span></div>
+    <form id="pwForm" autocomplete="on" hidden>
+      <label for="u">Username</label>
+      <input id="u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      <label for="p">Password</label>
+      <div class="pw"><input id="p" name="password" type="password" autocomplete="current-password" required><button type="button" id="showPw" class="link" aria-pressed="false">Show</button></div>
+      <button class="btn primary" id="pwBtn" type="submit">Sign in</button>
+    </form>
+    <p id="noMethods" class="alert" hidden>Sign-in is not configured yet. Please set the admin environment variables in Vercel.</p>
+    <p class="fine">Authorised staff only. Activity is logged.</p>
+  </section>
+</main>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="brand"><img src="/admin/logo.webp" alt="AK Digital Printing" width="120" height="36"><span class="tag">Enquiries</span></div>
+    <div class="who"><span id="whoName" class="muted"></span><button class="btn small" id="exportBtn" type="button">Export CSV</button><button class="btn small" id="logoutBtn" type="button">Sign out</button></div>
+  </header>
+  <main class="wrap">
+    <section class="stats" id="stats" aria-label="Summary"></section>
+    <section class="card filters" aria-label="Filters">
+      <input id="fq" type="search" placeholder="Search name, phone, email, ID…" aria-label="Search">
+      <select id="fstatus" aria-label="Status"></select>
+      <select id="fservice" aria-label="Service"></select>
+      <label class="inline">From <input id="ffrom" type="date"></label>
+      <label class="inline">To <input id="fto" type="date"></label>
+      <button class="btn small" id="fclear" type="button">Clear</button>
+    </section>
+    <div id="listError" class="alert" role="alert" hidden></div>
+    <section class="card tablecard">
+      <table id="tbl"><thead><tr><th>ID</th><th>Received</th><th>Customer</th><th>Service</th><th>Qty</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table>
+      <p id="empty" class="empty" hidden>No enquiries match.</p>
+      <nav class="pager" aria-label="Pages"><button class="btn small" id="prev" type="button">‹ Prev</button><span id="pageInfo" class="muted"></span><button class="btn small" id="next" type="button">Next ›</button></nav>
+    </section>
+  </main>
+
+  <aside id="drawer" class="drawer" aria-hidden="true" aria-labelledby="dTitle" role="dialog">
+    <div class="dhead"><h2 id="dTitle">Enquiry</h2><button class="btn small" id="dClose" type="button" aria-label="Close">✕</button></div>
+    <div id="dBody" class="dbody"></div>
+  </aside>
+  <div id="scrim" class="scrim" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</div>
+<script src="/admin/admin.js"></script>
+</body>
+</html>

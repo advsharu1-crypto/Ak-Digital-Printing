@@ -1,0 +1,14 @@
+{
+  "name": "ak-digital-printing-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AK Digital Printing: static website + Vercel functions for the staff enquiry inbox (/admin)",
+  "scripts": {
+    "build": "node scripts/build-vercel.js",
+    "dev": "node scripts/dev-server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": { "@neondatabase/serverless": "^1.2.1" },
+  "devDependencies": { "@electric-sql/pglite": "^0.5.17" },
+  "engines": { "node": ">=20" }
+}
